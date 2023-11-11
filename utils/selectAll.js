@@ -1,11 +1,14 @@
 // const express = require('express');
-const mysql = require('mysql2');
 
 // const PORT = process.env.PORT || 3001;
 // const app = express();
 
 // app.use(express.urlencoded({ extended: false }));
 // app.use(express.json());
+
+const inquirer = require('inquirer');
+
+const mysql = require('mysql2');
 
 const db = mysql.createConnection(
     {
@@ -14,7 +17,7 @@ const db = mysql.createConnection(
         password: 'password',
         database: 'company_db'
     },
-    console.log('Connected to the company_db database')
+    console.log('Connected to the company_db database from selectAll.js')
 );
 
 const selectAllDeparment = () => {
@@ -44,6 +47,25 @@ const selectAllEmployee = () => {
     .then( () => db.end());
 }
 
+const addDepartment = () => {
+    inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: 'Type a department name',
+            name: 'newDepartment'
+        }
+    ])
+    .then(res => {
+        db.promise().query('INSERT INTO department (name) VALUES (?)', res.newDepartment)
+        .then( ([rows,columns]) => {
+            console.log(`these are the ${rows}`);
+        })
+        .catch(console.log)
+        .then( () => db.end());
+    })
+};
+
 // db.query(`DELETE FROM favorite_books WHERE id = ?`, deletedRow, (err, result) => {
 //     if (err) {
 //       console.log(err);
@@ -55,4 +77,4 @@ const selectAllEmployee = () => {
 //     console.log(results);
 // });
 
-module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee };
+module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment };

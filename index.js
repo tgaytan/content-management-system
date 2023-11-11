@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 // const init = require('./utils/init');
-const { selectAllDeparment, selectAllRole, selectAllEmployee } = require('./utils/selectAll');
+const { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment } = require('./utils/selectAll');
+// const { addDepartment } = require('./utils/insertRow');
 
 const choices = [ 
     'View all departments', 
@@ -12,6 +13,7 @@ const choices = [
     'Update an employee role',
     'Exit'
 ];
+
 
 const init = () => {
         inquirer
@@ -38,7 +40,13 @@ const reviewUserAction = action => {
             selectAllRole();
             break;
         case choices[2]:
+            // const table = res.action.split(' ')[2]; //extracts the table name from the user's choice
+            // console.log(table);
+            // selectAll(table);
             selectAllEmployee();
+            break;
+        case choices[3]:
+            addDepartment();
             break;
     }
 };
