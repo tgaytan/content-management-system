@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 // const init = require('./utils/init');
-const { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee } = require('./utils/queries');
+const { selectAllDepartment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee, closeConnection } = require('./utils/queries');
 // const { addDepartment } = require('./utils/insertRow');
 
 const { table } = require('table');
@@ -36,7 +36,7 @@ const init = () => {
 const reviewUserAction = action => {
     switch(action) {
         case choices[0]:
-            selectAllDeparment()
+            selectAllDepartment()
             .then( data => {
                 console.log(table(data));
                 init();
@@ -60,16 +60,35 @@ const reviewUserAction = action => {
             });
             break;
         case choices[3]:
-            addDepartment();
+            addDepartment()
+            .then( data => {
+                console.log(table(data));
+                init();
+            });
             break;
         case choices[4]:
-            addRole();
+            addRole()
+            .then( data => {
+                console.log(table(data));
+                init();
+            });
             break;
         case choices[5]:
-            addEmployee();
+            addEmployee()
+            .then( data => {
+                console.log(table(data));
+                init();
+            });
             break;
         case choices[6]:
-            updateEmployee();
+            updateEmployee()
+            .then( data => {
+                console.log(table(data));
+                init();
+            });
+            break;
+        case choices[7]:
+            closeConnection();
             break;
     }
 };

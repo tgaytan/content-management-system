@@ -21,7 +21,7 @@ const db = mysql.createConnection(
     console.log('Connected to the company_db database from selectAll.js')
 );
 
-const selectAllDeparment = () => {
+const selectAllDepartment = () => {
     return db.promise().query('SELECT * FROM department')
     .then( ([rows,columns]) => {
         // console.log(rows[0]);
@@ -74,26 +74,26 @@ const selectAllEmployee = () => {
 }
 
 const addDepartment = () => {
-    inquirer
+    return inquirer
     .prompt([
         {
             type: 'input',
             message: 'Type a department name',
-            name: 'newDepartment'
+            name: 'department'
         }
     ])
     .then(res => {
-        db.promise().query('INSERT INTO department (name) VALUES (?)', res.newDepartment)
-        .then( ([rows,columns]) => {
-            console.log(`these are the ${rows}`);
-        })
-        .catch(console.log)
-        .then( () => db.end());
+        return db.promise().query('INSERT INTO department (name) VALUES (?)', res.department)
+        .then( () => selectAllDepartment())
+            // console.log(`these are the ${columns}`);
+            // console.log(Object.getOwnPropertyNames(rows));
+        .catch(console.log);
+        // .then( () => db.end());
     })
 };
 
 const addRole = () => {
-    inquirer
+    return inquirer
     .prompt([
         {
             type: 'input',
@@ -112,17 +112,15 @@ const addRole = () => {
         }
     ])
     .then(res => {
-        db.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department])
-        .then( res => {
-            console.log('data inserted successfully');
-        })
-        .catch(console.log)
-        .then( () => selectAllRole());
+        return db.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department])
+        .then( () => selectAllRole())
+        .catch(console.log);
+        // .then( () => selectAllRole());
     });
 };
 
 const addEmployee = () => {
-    inquirer
+    return inquirer
     .prompt([
         {
             type: 'input',
@@ -146,26 +144,27 @@ const addEmployee = () => {
         }
     ])
     .then( res => {
-        db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.role, res.manager])
-        .then( res => {
-            console.log('data inserted successfully');
-        })
-        .catch(console.log)
-        .then( () => selectAllEmployee());
+        return db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.role, res.manager])
+        .then( () => selectAllEmployee())
+        .catch(console.log);
+        // .then( () => selectAllEmployee());
     });
 };
 
 const updateEmployee = () => {
-    selectAllEmployee()
+    return selectAllEmployee()
     .then( rows => {
-        console.log('------------');
-        const names = rows.map( data => `${data.first_name} ${data.last_name}`)
+        // console.log('------------');
+        // console.log(rows);
+        // console.log(rows.shift());
+        rows.shift();
+        const names = rows.map( data => `${data[1]} ${data[2]}`)
         // console.log(names);
         return names;
     })
     .then( names => {
         // console.log(names);
-        inquirer
+        return inquirer
         .prompt([
             {
                 type: 'list',
@@ -184,14 +183,16 @@ const updateEmployee = () => {
             const lastName = res.employee.split(' ')[1];
             // console.log(firstName, 'test', lastName);
             // console.log(res.employee, res.role);
-            db.promise().query('UPDATE employee SET role_id = ? WHERE first_name=? AND last_name=?', [res.role, firstName, lastName])
+            return db.promise().query('UPDATE employee SET role_id = ? WHERE first_name=? AND last_name=?', [res.role, firstName, lastName])
             .then( (res, err) => {
                 console.log('update successful');
-                selectAllEmployee();
+                return selectAllEmployee();
             });
         });
     });
 };
+
+const closeConnection = () => db.end();
 
 
 
@@ -206,4 +207,4 @@ const updateEmployee = () => {
 //     console.log(results);
 // });
 
-module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee };
+module.exports = { selectAllDepartment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee, closeConnection };
