@@ -1,16 +1,7 @@
-// const express = require('express');
-
-// const PORT = process.env.PORT || 3001;
-// const app = express();
-
-// app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
-
-const { table } = require('table');
 const inquirer = require('inquirer');
-
 const mysql = require('mysql2');
 
+// starting db connection
 const db = mysql.createConnection(
     {
         host: '127.0.0.1',
@@ -21,8 +12,8 @@ const db = mysql.createConnection(
     console.log('Connected to the company_db database from selectAll.js')
 );
 
+// this function checks which table the user wants to perform a 'SELECT *' on
 const selectAll = table => {
-    // console.log(table);
     switch(table) {
         case "departments":
             return selectAllDepartment();
@@ -36,58 +27,58 @@ const selectAll = table => {
     }
 };
 
+// this function checks which table the user wants to add data to
+const addData = table => {
+    switch(table) {
+        case "department":
+            return addDepartment();
+            break;
+        case "role":
+            return addRole();
+            break;
+        case "employee":
+            return addEmployee();
+            break;
+    }
+};
+
+// select * from department
 const selectAllDepartment = () => {
     return db.promise().query('SELECT * FROM department')
     .then( ([rows,columns]) => {
-        // console.log(rows[0]);
-        // console.log(columns[0]);
-        // rows.forEach(row => console.log(row));
-        // columns.forEach(column => console.log(column));
-        // console.log(columnNames);
-        // console.log(allRows);
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.name]);
         const allData = [columnNames].concat(rowsArray);
-        // console.log(table(allData));
-        return allData;
+        return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
     .catch(console.log);
-    // .then( () => db.end());
 }
 
+// select * from role
 const selectAllRole = () => {
     return db.promise().query('SELECT * FROM role')
     .then( ([rows,columns]) => {
-        // console.log(rows);
-        // return rows;
-
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.title, row.salary, row.department_id]);
         const allData = [columnNames].concat(rowsArray);
-        // console.log(table(allData));
-        return allData;
+        return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
     .catch(console.log);
-    // .then( () => db.end());
 }
 
+// select * from employee
 const selectAllEmployee = () => {
     return db.promise().query('SELECT * FROM employee')
     .then( ([rows,columns]) => {
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.role_id, row.manager_id]);
         const allData = [columnNames].concat(rowsArray);
-        return allData;
-        // console.log(rows);
-        // return rows;
+        return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
     .catch(console.log);
-    // .then( (rows) => {
-    //     // db.end();
-    //     return rows;
-    // });
 }
 
+// adds a new department and then displays entire dept table again
 const addDepartment = () => {
     return inquirer
     .prompt([
@@ -100,13 +91,11 @@ const addDepartment = () => {
     .then(res => {
         return db.promise().query('INSERT INTO department (name) VALUES (?)', res.department)
         .then( () => selectAllDepartment())
-            // console.log(`these are the ${columns}`);
-            // console.log(Object.getOwnPropertyNames(rows));
         .catch(console.log);
-        // .then( () => db.end());
     })
 };
 
+// adds a new role and displays entire role table
 const addRole = () => {
     return inquirer
     .prompt([
@@ -130,10 +119,10 @@ const addRole = () => {
         return db.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department])
         .then( () => selectAllRole())
         .catch(console.log);
-        // .then( () => selectAllRole());
     });
 };
 
+// adds a new employee and then displays the employee table
 const addEmployee = () => {
     return inquirer
     .prompt([
@@ -162,23 +151,18 @@ const addEmployee = () => {
         return db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.role, res.manager])
         .then( () => selectAllEmployee())
         .catch(console.log);
-        // .then( () => selectAllEmployee());
     });
 };
 
+// updates a role for an employee
 const updateEmployee = () => {
     return selectAllEmployee()
     .then( rows => {
-        // console.log('------------');
-        // console.log(rows);
-        // console.log(rows.shift());
         rows.shift();
-        const names = rows.map( data => `${data[1]} ${data[2]}`)
-        // console.log(names);
+        const names = rows.map( data => `${data[1]} ${data[2]}`);
         return names;
     })
     .then( names => {
-        // console.log(names);
         return inquirer
         .prompt([
             {
@@ -196,8 +180,6 @@ const updateEmployee = () => {
         .then(res => {
             const firstName = res.employee.split(' ')[0];
             const lastName = res.employee.split(' ')[1];
-            // console.log(firstName, 'test', lastName);
-            // console.log(res.employee, res.role);
             return db.promise().query('UPDATE employee SET role_id = ? WHERE first_name=? AND last_name=?', [res.role, firstName, lastName])
             .then( (res, err) => {
                 console.log('update successful');
@@ -207,19 +189,8 @@ const updateEmployee = () => {
     });
 };
 
+// closes db connection
 const closeConnection = () => db.end();
 
 
-
-// db.query(`DELETE FROM favorite_books WHERE id = ?`, deletedRow, (err, result) => {
-//     if (err) {
-//       console.log(err);
-//     }
-//     console.log(result);
-//   });
-
-// db.query('SELECT * FROM department', (err, results) => {
-//     console.log(results);
-// });
-
-module.exports = { selectAll, selectAllDepartment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee, closeConnection };
+module.exports = { selectAll, addData, updateEmployee, closeConnection };

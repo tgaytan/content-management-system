@@ -1,22 +1,20 @@
 const inquirer = require('inquirer');
-// const init = require('./utils/init');
-const { selectAll, addDepartment, addRole, addEmployee, updateEmployee, closeConnection } = require('./utils/queries');
-// const { addDepartment } = require('./utils/insertRow');
+const { selectAll, addData, updateEmployee, closeConnection } = require('./utils/queries');
+const { table } = require('table'); // used to display the data in a nice table
 
-const { table } = require('table');
-
+// available choices when application is launched
 const choices = [ 
     'View all departments', 
     'View all roles', 
     'View all employees', 
-    'Add a deparment', 
+    'Add a department', 
     'Add a role', 
     'Add an employee', 
     'Update an employee role',
     'Exit'
 ];
 
-
+// this function runs first and asks the user what they would like to do and takes their answer and passes it to reviewUserAction
 const init = () => {
         inquirer
         .prompt([
@@ -28,77 +26,41 @@ const init = () => {
             }
         ])
         .then(res => {
-            // console.log(`You chose ${res.action}`);
             reviewUserAction(res.action);
         });
     }
 
+// this function takes the user's input andd decides which function to call using switch
 const reviewUserAction = action => {
+    const tableName = action.split(' ')[2]; //extracts the table name from the user's choice
     switch(action) {
-        // case choices[0]:
-        //     selectAllDepartment()
-        //     .then( data => {
-        //         console.log(table(data));
-        //         init();
-        //     });
-        //     break;
-        // case choices[1]:
-        //     selectAllRole()
-        //     .then( data => {
-        //         console.log(table(data));
-        //         init();
-        //     });
-        //     break;
+        // these are choices where the fuction will run 'SELCT * from tableName'
         case choices[0]:
         case choices[1]:
         case choices[2]:
-            const tableName = action.split(' ')[2]; //extracts the table name from the user's choice
-            // console.log(tableName);
             selectAll(tableName)
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
-            // selectAllEmployee()
-            // .then( data => {
-            //     console.log(table(data));
-            //     init();
-            // });
+            .then( data => renderAndRestart(data));
             break;
+        // these are the choices were data is being added
         case choices[3]:
-            addDepartment()
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
-            break;
         case choices[4]:
-            addRole()
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
+        case choices[5]:    
+            addData(tableName)
+            .then( data => renderAndRestart(data));
             break;
-        case choices[5]:
-            addEmployee()
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
-            break;
+        // this choice is to update the employee role
         case choices[6]:
             updateEmployee()
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
+            .then( data => renderAndRestart(data));
             break;
+        // this allows the user to exit out of the application
         case choices[7]:
             closeConnection();
             break;
     }
 };
 
+// this function renders the data in a nice table and then restarts the application
 const renderAndRestart = data => {
     console.log(table(data));
     init();
@@ -106,8 +68,4 @@ const renderAndRestart = data => {
 
 init();
 
-// selectAll('employees')
-// .then( data => {
-//     console.log(table(data));
-//     init();
-// });
+
