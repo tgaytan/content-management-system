@@ -66,6 +66,37 @@ const addDepartment = () => {
     })
 };
 
+const addRole = () => {
+    inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: 'Type a title',
+            name: 'title'
+        },
+        {
+            type: 'number',
+            message: 'Type a salary',
+            name: 'salary'
+        },
+        {
+            type: 'input',
+            message: 'Which department is this role for?',
+            name: 'department'
+        }
+    ])
+    .then(res => {
+        db.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department])
+        .then( res => {
+            console.log('data inserted successfully');
+        })
+        .catch(console.log)
+        .then( () => selectAllRole())
+    });
+};
+
+
+
 // db.query(`DELETE FROM favorite_books WHERE id = ?`, deletedRow, (err, result) => {
 //     if (err) {
 //       console.log(err);
@@ -77,4 +108,4 @@ const addDepartment = () => {
 //     console.log(results);
 // });
 
-module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment };
+module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole };
