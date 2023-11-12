@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 // const init = require('./utils/init');
-const { selectAllDepartment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee, closeConnection } = require('./utils/queries');
+const { selectAll, addDepartment, addRole, addEmployee, updateEmployee, closeConnection } = require('./utils/queries');
 // const { addDepartment } = require('./utils/insertRow');
 
 const { table } = require('table');
@@ -35,29 +35,35 @@ const init = () => {
 
 const reviewUserAction = action => {
     switch(action) {
+        // case choices[0]:
+        //     selectAllDepartment()
+        //     .then( data => {
+        //         console.log(table(data));
+        //         init();
+        //     });
+        //     break;
+        // case choices[1]:
+        //     selectAllRole()
+        //     .then( data => {
+        //         console.log(table(data));
+        //         init();
+        //     });
+        //     break;
         case choices[0]:
-            selectAllDepartment()
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
-            break;
         case choices[1]:
-            selectAllRole()
-            .then( data => {
-                console.log(table(data));
-                init();
-            });
-            break;
         case choices[2]:
-            // const table = res.action.split(' ')[2]; //extracts the table name from the user's choice
-            // console.log(table);
-            // selectAll(table);
-            selectAllEmployee()
+            const tableName = action.split(' ')[2]; //extracts the table name from the user's choice
+            // console.log(tableName);
+            selectAll(tableName)
             .then( data => {
                 console.log(table(data));
                 init();
             });
+            // selectAllEmployee()
+            // .then( data => {
+            //     console.log(table(data));
+            //     init();
+            // });
             break;
         case choices[3]:
             addDepartment()
@@ -93,6 +99,15 @@ const reviewUserAction = action => {
     }
 };
 
+const renderAndRestart = data => {
+    console.log(table(data));
+    init();
+};
+
 init();
 
-
+// selectAll('employees')
+// .then( data => {
+//     console.log(table(data));
+//     init();
+// });

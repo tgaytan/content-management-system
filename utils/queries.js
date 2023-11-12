@@ -21,6 +21,21 @@ const db = mysql.createConnection(
     console.log('Connected to the company_db database from selectAll.js')
 );
 
+const selectAll = table => {
+    // console.log(table);
+    switch(table) {
+        case "departments":
+            return selectAllDepartment();
+            break;
+        case "roles":
+            return selectAllRole();
+            break;
+        case "employees":
+            return selectAllEmployee();
+            break;
+    }
+};
+
 const selectAllDepartment = () => {
     return db.promise().query('SELECT * FROM department')
     .then( ([rows,columns]) => {
@@ -207,4 +222,4 @@ const closeConnection = () => db.end();
 //     console.log(results);
 // });
 
-module.exports = { selectAllDepartment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee, closeConnection };
+module.exports = { selectAll, selectAllDepartment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee, closeConnection };
