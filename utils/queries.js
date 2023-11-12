@@ -6,6 +6,7 @@
 // app.use(express.urlencoded({ extended: false }));
 // app.use(express.json());
 
+const { table } = require('table');
 const inquirer = require('inquirer');
 
 const mysql = require('mysql2');
@@ -23,21 +24,36 @@ const db = mysql.createConnection(
 const selectAllDeparment = () => {
     db.promise().query('SELECT * FROM department')
     .then( ([rows,columns]) => {
-        console.log(rows);
+        // console.log(rows[0]);
+        // console.log(columns[0]);
+        // rows.forEach(row => console.log(row));
+        // columns.forEach(column => console.log(column));
+        // console.log(columnNames);
+        // console.log(allRows);
+        const columnNames = columns.map(column => column.name);
+        const rowsArray = rows.map(row => [row.id, row.name]);
+        const allData = [columnNames].concat(rowsArray);
+        console.log(table(allData));
         return rows;
     })
-    .catch(console.log)
-    .then( () => db.end());
+    .catch(console.log);
+    // .then( () => db.end());
 }
 
 const selectAllRole = () => {
     db.promise().query('SELECT * FROM role')
     .then( ([rows,columns]) => {
-        console.log(rows);
+        // console.log(rows);
+        // return rows;
+
+        const columnNames = columns.map(column => column.name);
+        const rowsArray = rows.map(row => [row.id, row.title, row.salary, row.department_id]);
+        const allData = [columnNames].concat(rowsArray);
+        console.log(table(allData));
         return rows;
     })
-    .catch(console.log)
-    .then( () => db.end());
+    .catch(console.log);
+    // .then( () => db.end());
 }
 
 const selectAllEmployee = () => {
