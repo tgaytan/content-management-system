@@ -91,7 +91,41 @@ const addRole = () => {
             console.log('data inserted successfully');
         })
         .catch(console.log)
-        .then( () => selectAllRole())
+        .then( () => selectAllRole());
+    });
+};
+
+const addEmployee = () => {
+    inquirer
+    .prompt([
+        {
+            type: 'input',
+            message: 'enter first name',
+            name: 'firstName'
+        },
+        {
+            type: 'input',
+            message: 'enter last name',
+            name: 'lastName'
+        },
+        {
+            type: 'input',
+            message: 'Enter their role',
+            name: 'role'
+        },
+        {
+            type: 'input',
+            message: 'who is their manager?',
+            name: 'manager'
+        }
+    ])
+    .then( res => {
+        db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.role, res.manager])
+        .then( res => {
+            console.log('data inserted successfully');
+        })
+        .catch(console.log)
+        .then( () => selectAllEmployee());
     });
 };
 
@@ -108,4 +142,4 @@ const addRole = () => {
 //     console.log(results);
 // });
 
-module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole };
+module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee };
