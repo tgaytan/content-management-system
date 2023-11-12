@@ -22,7 +22,7 @@ const db = mysql.createConnection(
 );
 
 const selectAllDeparment = () => {
-    db.promise().query('SELECT * FROM department')
+    return db.promise().query('SELECT * FROM department')
     .then( ([rows,columns]) => {
         // console.log(rows[0]);
         // console.log(columns[0]);
@@ -33,15 +33,15 @@ const selectAllDeparment = () => {
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.name]);
         const allData = [columnNames].concat(rowsArray);
-        console.log(table(allData));
-        return rows;
+        // console.log(table(allData));
+        return allData;
     })
     .catch(console.log);
     // .then( () => db.end());
 }
 
 const selectAllRole = () => {
-    db.promise().query('SELECT * FROM role')
+    return db.promise().query('SELECT * FROM role')
     .then( ([rows,columns]) => {
         // console.log(rows);
         // return rows;
@@ -49,8 +49,8 @@ const selectAllRole = () => {
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.title, row.salary, row.department_id]);
         const allData = [columnNames].concat(rowsArray);
-        console.log(table(allData));
-        return rows;
+        // console.log(table(allData));
+        return allData;
     })
     .catch(console.log);
     // .then( () => db.end());
@@ -59,14 +59,18 @@ const selectAllRole = () => {
 const selectAllEmployee = () => {
     return db.promise().query('SELECT * FROM employee')
     .then( ([rows,columns]) => {
-        console.log(rows);
-        return rows;
+        const columnNames = columns.map(column => column.name);
+        const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.role_id, row.manager_id]);
+        const allData = [columnNames].concat(rowsArray);
+        return allData;
+        // console.log(rows);
+        // return rows;
     })
-    .catch(console.log)
-    .then( (rows) => {
-        // db.end();
-        return rows;
-    });
+    .catch(console.log);
+    // .then( (rows) => {
+    //     // db.end();
+    //     return rows;
+    // });
 }
 
 const addDepartment = () => {
