@@ -24,6 +24,7 @@ const selectAllDeparment = () => {
     db.promise().query('SELECT * FROM department')
     .then( ([rows,columns]) => {
         console.log(rows);
+        return rows;
     })
     .catch(console.log)
     .then( () => db.end());
@@ -33,18 +34,23 @@ const selectAllRole = () => {
     db.promise().query('SELECT * FROM role')
     .then( ([rows,columns]) => {
         console.log(rows);
+        return rows;
     })
     .catch(console.log)
     .then( () => db.end());
 }
 
 const selectAllEmployee = () => {
-    db.promise().query('SELECT * FROM employee')
+    return db.promise().query('SELECT * FROM employee')
     .then( ([rows,columns]) => {
         console.log(rows);
+        return rows;
     })
     .catch(console.log)
-    .then( () => db.end());
+    .then( (rows) => {
+        // db.end();
+        return rows;
+    });
 }
 
 const addDepartment = () => {
@@ -129,6 +135,44 @@ const addEmployee = () => {
     });
 };
 
+const updateEmployee = () => {
+    selectAllEmployee()
+    .then( rows => {
+        console.log('------------');
+        const names = rows.map( data => `${data.first_name} ${data.last_name}`)
+        // console.log(names);
+        return names;
+    })
+    .then( names => {
+        // console.log(names);
+        inquirer
+        .prompt([
+            {
+                type: 'list',
+                choices: names,
+                message: 'Which employee?',
+                name: 'employee'
+            },
+            {
+                type: 'numer',
+                message: 'what is their new role?',
+                name: 'role'
+            }
+        ])
+        .then(res => {
+            const firstName = res.employee.split(' ')[0];
+            const lastName = res.employee.split(' ')[1];
+            // console.log(firstName, 'test', lastName);
+            // console.log(res.employee, res.role);
+            db.promise().query('UPDATE employee SET role_id = ? WHERE first_name=? AND last_name=?', [res.role, firstName, lastName])
+            .then( (res, err) => {
+                console.log('update successful');
+                selectAllEmployee();
+            });
+        });
+    });
+};
+
 
 
 // db.query(`DELETE FROM favorite_books WHERE id = ?`, deletedRow, (err, result) => {
@@ -142,4 +186,4 @@ const addEmployee = () => {
 //     console.log(results);
 // });
 
-module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee };
+module.exports = { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee };

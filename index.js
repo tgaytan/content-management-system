@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 // const init = require('./utils/init');
-const { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee } = require('./utils/queries');
+const { selectAllDeparment, selectAllRole, selectAllEmployee, addDepartment, addRole, addEmployee, updateEmployee } = require('./utils/queries');
 // const { addDepartment } = require('./utils/insertRow');
 
 const choices = [ 
@@ -53,7 +53,10 @@ const reviewUserAction = action => {
             break;
         case choices[5]:
             addEmployee();
-            break
+            break;
+        case choices[6]:
+            updateEmployee();
+            break;
     }
 };
 
