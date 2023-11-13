@@ -56,10 +56,11 @@ const selectAllDepartment = () => {
 
 // select * from role
 const selectAllRole = () => {
-    return db.promise().query('SELECT * FROM role')
+    return db.promise().query('SELECT role.id, role.title, department.name AS department, role.salary FROM role INNER JOIN department ON role.department_id=department.id')
     .then( ([rows,columns]) => {
+        console.log(rows);
         const columnNames = columns.map(column => column.name);
-        const rowsArray = rows.map(row => [row.id, row.title, row.salary, row.department_id]);
+        const rowsArray = rows.map(row => [row.id, row.title, row.department, row.salary]);
         const allData = [columnNames].concat(rowsArray);
         return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
@@ -68,10 +69,10 @@ const selectAllRole = () => {
 
 // select * from employee
 const selectAllEmployee = () => {
-    return db.promise().query('SELECT * FROM employee')
+    return db.promise().query('SELECT emp.id, emp.first_name, emp.last_name, role.title, department.name AS department, role.salary, mang.first_name AS mang_first_name, mang.last_name AS mang_last_name FROM employee emp INNER JOIN role ON emp.role_id=role.id INNER JOIN employee mang ON emp.manager_id=mang.id INNER JOIN department ON role.department_ID=department.id')
     .then( ([rows,columns]) => {
         const columnNames = columns.map(column => column.name);
-        const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.role_id, row.manager_id]);
+        const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.title, row.department, row.salary, row.mang_first_name, row.mang_last_name]);
         const allData = [columnNames].concat(rowsArray);
         return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
