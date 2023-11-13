@@ -58,7 +58,6 @@ const selectAllDepartment = () => {
 const selectAllRole = () => {
     return db.promise().query('SELECT role.id, role.title, department.name AS department, role.salary FROM role INNER JOIN department ON role.department_id=department.id')
     .then( ([rows,columns]) => {
-        console.log(rows);
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.title, row.department, row.salary]);
         const allData = [columnNames].concat(rowsArray);
@@ -69,7 +68,7 @@ const selectAllRole = () => {
 
 // select * from employee
 const selectAllEmployee = () => {
-    return db.promise().query('SELECT emp.id, emp.first_name, emp.last_name, role.title, department.name AS department, role.salary, mang.first_name AS mang_first_name, mang.last_name AS mang_last_name FROM employee emp INNER JOIN role ON emp.role_id=role.id INNER JOIN employee mang ON emp.manager_id=mang.id INNER JOIN department ON role.department_ID=department.id')
+    return db.promise().query('SELECT emp.id, emp.first_name, emp.last_name, role.title, department.name AS department, role.salary, mang.first_name AS mang_first_name, mang.last_name AS mang_last_name FROM employee emp INNER JOIN role ON emp.role_id=role.id LEFT JOIN employee mang ON emp.manager_id=mang.id INNER JOIN department ON role.department_ID=department.id')
     .then( ([rows,columns]) => {
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.title, row.department, row.salary, row.mang_first_name, row.mang_last_name]);
@@ -101,9 +100,7 @@ const addRole = () => {
     return selectAllDepartment()
     .then(data => {
         data.shift();
-        // console.log(data);
         const departmentNames = data.map(row => row[1]);
-        // console.log(departmentNames);
         return inquirer
         .prompt([
             {
@@ -134,33 +131,56 @@ const addRole = () => {
 
 // adds a new employee and then displays the employee table
 const addEmployee = () => {
-    return inquirer
-    .prompt([
-        {
-            type: 'input',
-            message: 'enter first name',
-            name: 'firstName'
-        },
-        {
-            type: 'input',
-            message: 'enter last name',
-            name: 'lastName'
-        },
-        {
-            type: 'input',
-            message: 'Enter their role',
-            name: 'role'
-        },
-        {
-            type: 'input',
-            message: 'who is their manager?',
-            name: 'manager'
-        }
-    ])
-    .then( res => {
-        return db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.role, res.manager])
-        .then( () => selectAllEmployee())
-        .catch(console.log);
+    return selectAllRole()
+    .then( roleData => {
+        roleData.shift();
+        const jobTitles = roleData.map(array => array[1]);
+
+        return selectAllEmployee()
+        .then( empData => {
+            empData.shift();
+            const employeeNames = empData.map(array => `${array[1]} ${array[2]}`);
+            employeeNames[employeeNames.length] = 'None';
+            return inquirer
+            .prompt([
+                {
+                    type: 'input',
+                    message: 'enter first name',
+                    name: 'firstName'
+                },
+                {
+                    type: 'input',
+                    message: 'enter last name',
+                    name: 'lastName'
+                },
+                {
+                    type: 'list',
+                    message: 'Enter their role',
+                    name: 'role',
+                    choices: jobTitles
+                },
+                {
+                    type: 'list',
+                    message: 'who is their manager?',
+                    name: 'manager',
+                    choices: employeeNames
+                }
+            ])
+            .then( res => {
+                const roleID = roleData.filter(row => res.role === row[1]);
+                console.log(roleData);
+                console.log('------------');
+                console.log(roleData[0]);
+                console.log('------------');
+                console.log(roleID[0][0]);
+                const managerID = empData.filter(row => `${row[1]} ${row[2]}` === res.manager);
+                // console.log(roleID);
+                // console.log(managerID[0][0]);
+                return db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, roleID[0][0], managerID[0][0]])
+                .then( () => selectAllEmployee())
+                .catch(console.log);
+            });
+        });
     });
 };
 
