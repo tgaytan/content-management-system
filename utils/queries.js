@@ -135,13 +135,13 @@ const addEmployee = () => {
     return selectAllRole()
         .then( roleData => {
             roleData.shift();
-            const jobTitles = roleData.map(array => array[1]);
+            const jobTitles = roleData.map(array => array[1]); // getting current list of job titles to include as choices in inquirer
 
             return selectAllEmployee()
                 .then( empData => {
                     empData.shift();
-                    const employeeNames = empData.map(array => `${array[1]} ${array[2]}`);
-                    employeeNames[employeeNames.length] = 'None';
+                    const employeeNames = empData.map(array => `${array[1]} ${array[2]}`); // getting current list of employees to include as choices in inquirer
+                    employeeNames[employeeNames.length] = 'None'; // adding none as an option in case new employee does not have a manager
                     
                     return inquirer
                         .prompt([
@@ -192,12 +192,12 @@ const updateEmployee = () => {
     return selectAllRole()
         .then( roleData => {
             roleData.shift();
-            const jobTitles = roleData.map(array => array[1]);
+            const jobTitles = roleData.map(array => array[1]); // getting current list of job titles to include as choices in inquirer
 
             return selectAllEmployee()
                 .then( rows => {
                     rows.shift();
-                    const names = rows.map( data => `${data[1]} ${data[2]}`);
+                    const names = rows.map( data => `${data[1]} ${data[2]}`); // getting list of current employees to includes as choices in inquirer
                     return names;
                 })
                 .then( names => {
