@@ -98,28 +98,37 @@ const addDepartment = () => {
 
 // adds a new role and displays entire role table
 const addRole = () => {
-    return inquirer
-    .prompt([
-        {
-            type: 'input',
-            message: 'Type a title',
-            name: 'title'
-        },
-        {
-            type: 'number',
-            message: 'Type a salary',
-            name: 'salary'
-        },
-        {
-            type: 'input',
-            message: 'Which department is this role for?',
-            name: 'department'
-        }
-    ])
-    .then(res => {
-        return db.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department])
-        .then( () => selectAllRole())
-        .catch(console.log);
+    return selectAllDepartment()
+    .then(data => {
+        data.shift();
+        // console.log(data);
+        const departmentNames = data.map(row => row[1]);
+        // console.log(departmentNames);
+        return inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'Type a title',
+                name: 'title'
+            },
+            {
+                type: 'number',
+                message: 'Type a salary',
+                name: 'salary'
+            },
+            {
+                type: 'list',
+                message: 'Which department is this role for?',
+                name: 'department',
+                choices: departmentNames
+            }
+        ])
+        .then(res => {
+            const departmentID = data.filter(row => row[1] === res.department);
+            return db.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, departmentID[0][0]])
+            .then( () => selectAllRole())
+            .catch(console.log);
+        });
     });
 };
 
