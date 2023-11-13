@@ -9,7 +9,7 @@ const db = mysql.createConnection(
         password: 'password',
         database: 'company_db'
     },
-    console.log('Connected to the company_db database from selectAll.js')
+    console.log('Connected to the company_db database from queries.js')
 );
 
 // this function checks which table the user wants to perform a 'SELECT *' on
@@ -73,7 +73,6 @@ const selectAllEmployee = () => {
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.title, row.department, row.salary, row.mang_first_name, row.mang_last_name]);
         const allData = [columnNames].concat(rowsArray);
-        console.log(rows);
         return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
     .catch(console.log);
