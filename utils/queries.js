@@ -68,11 +68,12 @@ const selectAllRole = () => {
 
 // select * from employee
 const selectAllEmployee = () => {
-    return db.promise().query('SELECT emp.id, emp.first_name, emp.last_name, role.title, department.name AS department, role.salary, mang.first_name AS mang_first_name, mang.last_name AS mang_last_name FROM employee emp INNER JOIN role ON emp.role_id=role.id LEFT JOIN employee mang ON emp.manager_id=mang.id INNER JOIN department ON role.department_ID=department.id')
+    return db.promise().query('SELECT emp.id, emp.first_name, emp.last_name, role.title, department.name AS department, role.salary, mang.first_name AS mang_first_name, mang.last_name AS mang_last_name FROM employee emp INNER JOIN role ON emp.role_id=role.id LEFT JOIN employee mang ON emp.manager_id=mang.id INNER JOIN department ON role.department_ID=department.id ORDER BY emp.id')
     .then( ([rows,columns]) => {
         const columnNames = columns.map(column => column.name);
         const rowsArray = rows.map(row => [row.id, row.first_name, row.last_name, row.title, row.department, row.salary, row.mang_first_name, row.mang_last_name]);
         const allData = [columnNames].concat(rowsArray);
+        console.log(rows);
         return allData; // the data was combined into an array so it can be rendered with the 'table' package
     })
     .catch(console.log);
@@ -132,91 +133,102 @@ const addRole = () => {
 // adds a new employee and then displays the employee table
 const addEmployee = () => {
     return selectAllRole()
-    .then( roleData => {
-        roleData.shift();
-        const jobTitles = roleData.map(array => array[1]);
+        .then( roleData => {
+            roleData.shift();
+            const jobTitles = roleData.map(array => array[1]);
 
-        return selectAllEmployee()
-        .then( empData => {
-            empData.shift();
-            const employeeNames = empData.map(array => `${array[1]} ${array[2]}`);
-            employeeNames[employeeNames.length] = 'None';
-            return inquirer
-            .prompt([
-                {
-                    type: 'input',
-                    message: 'enter first name',
-                    name: 'firstName'
-                },
-                {
-                    type: 'input',
-                    message: 'enter last name',
-                    name: 'lastName'
-                },
-                {
-                    type: 'list',
-                    message: 'Enter their role',
-                    name: 'role',
-                    choices: jobTitles
-                },
-                {
-                    type: 'list',
-                    message: 'who is their manager?',
-                    name: 'manager',
-                    choices: employeeNames
-                }
-            ])
-            .then( res => {
-                const roleID = roleData.filter(row => res.role === row[1]);
-                console.log(roleData);
-                console.log('------------');
-                console.log(roleData[0]);
-                console.log('------------');
-                console.log(roleID[0][0]);
-                const managerID = empData.filter(row => `${row[1]} ${row[2]}` === res.manager);
-                // console.log(roleID);
-                // console.log(managerID[0][0]);
-                return db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, roleID[0][0], managerID[0][0]])
-                .then( () => selectAllEmployee())
-                .catch(console.log);
-            });
+            return selectAllEmployee()
+                .then( empData => {
+                    empData.shift();
+                    const employeeNames = empData.map(array => `${array[1]} ${array[2]}`);
+                    employeeNames[employeeNames.length] = 'None';
+                    
+                    return inquirer
+                        .prompt([
+                            {
+                                type: 'input',
+                                message: 'enter first name',
+                                name: 'firstName'
+                            },
+                            {
+                                type: 'input',
+                                message: 'enter last name',
+                                name: 'lastName'
+                            },
+                            {
+                                type: 'list',
+                                message: 'Enter their role',
+                                name: 'role',
+                                choices: jobTitles
+                            },
+                            {
+                                type: 'list',
+                                message: 'who is their manager?',
+                                name: 'manager',
+                                choices: employeeNames
+                            }
+                        ])
+                        .then( res => {
+                            const roleID = roleData.filter(row => res.role === row[1]);
+                            let theirManager;
+
+                            if (res.manager === 'None') {
+                                theirManager = null;
+                            } else {
+                                const managerID = empData.filter(row => `${row[1]} ${row[2]}` === res.manager);
+                                theirManager = managerID[0][0];
+                            }
+
+                            return db.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, roleID[0][0], theirManager])
+                                .then( () => selectAllEmployee())
+                                .catch(console.log);
+                        });
+                });
         });
-    });
 };
 
 // updates a role for an employee
 const updateEmployee = () => {
-    return selectAllEmployee()
-    .then( rows => {
-        rows.shift();
-        const names = rows.map( data => `${data[1]} ${data[2]}`);
-        return names;
-    })
-    .then( names => {
-        return inquirer
-        .prompt([
-            {
-                type: 'list',
-                choices: names,
-                message: 'Which employee?',
-                name: 'employee'
-            },
-            {
-                type: 'numer',
-                message: 'what is their new role?',
-                name: 'role'
-            }
-        ])
-        .then(res => {
-            const firstName = res.employee.split(' ')[0];
-            const lastName = res.employee.split(' ')[1];
-            return db.promise().query('UPDATE employee SET role_id = ? WHERE first_name=? AND last_name=?', [res.role, firstName, lastName])
-            .then( (res, err) => {
-                console.log('update successful');
-                return selectAllEmployee();
-            });
+    return selectAllRole()
+        .then( roleData => {
+            roleData.shift();
+            const jobTitles = roleData.map(array => array[1]);
+
+            return selectAllEmployee()
+                .then( rows => {
+                    rows.shift();
+                    const names = rows.map( data => `${data[1]} ${data[2]}`);
+                    return names;
+                })
+                .then( names => {
+                    return inquirer
+                        .prompt([
+                            {
+                                type: 'list',
+                                choices: names,
+                                message: 'Which employee?',
+                                name: 'employee'
+                            },
+                            {
+                                type: 'list',
+                                message: 'what is their new role?',
+                                name: 'role',
+                                choices: jobTitles
+                            }
+                        ])
+                        .then(res => {
+                            const firstName = res.employee.split(' ')[0];
+                            const lastName = res.employee.split(' ')[1];
+                            const roleID = roleData.filter(row => res.role === row[1]);
+
+                            return db.promise().query('UPDATE employee SET role_id = ? WHERE first_name=? AND last_name=?', [roleID[0][0], firstName, lastName])
+                                .then( (res, err) => {
+                                    console.log('update successful');
+                                    return selectAllEmployee();
+                                });
+                        });
+                });
         });
-    });
 };
 
 // closes db connection
